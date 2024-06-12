@@ -2,6 +2,7 @@
 import os
 import re
 import requests
+import chardet
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -17,16 +18,22 @@ def get_curl_command(url: str) -> str:
         'Connection': 'keep-alive',
         'Referer': url  # Agrega el encabezado Referer con la URL de origen
     }
-     
+    
     try:
-        html = requests.get(url, headers=headers).content.decode()
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Lanza una excepción si hay un error HTTP
+        encoding = response.encoding if 'charset' in response.headers.get('content-type', '').lower() else None
+        html = response.content.decode(encoding or 'utf-8', errors='ignore')
+        
         token = re.search(r".*document.getElementById.*\('norobotlink'\).innerHTML =.*?token=(.*?)'.*?;", html, re.M|re.S).group(1)
         infix = re.search(r'.*<div id="ideoooolink" style="display:none;">(.*?token=).*?<[/]div>', html, re.M|re.S).group(1)
         final_URL = f'{PREFIX}{infix}{token}'
         orig_title = re.search(r'.*<meta name="og:title" content="(.*?)">', html, re.M|re.S).group(1)
         return f"curl -L -o '{orig_title}' '{final_URL}'"
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         raise ValueError(f"Error retrieving data from URL: {str(e)}")
+    except Exception as e:
+        raise ValueError(f"Error processing HTML response: {str(e)}")
 
 @app.route('/generate-curl', methods=['GET'])
 def generate_curl():
