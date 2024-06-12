@@ -2,6 +2,7 @@
 import os
 import re
 import requests
+import chardet
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -19,8 +20,9 @@ def get_curl_command(url: str) -> str:
     session = requests.Session()
     response = session.get(url, headers=headers)
     
-    # Detect and handle encoding
-    encoding = response.encoding if response.encoding else 'utf-8'
+    # Detect and handle encoding using chardet
+    result = chardet.detect(response.content)
+    encoding = result['encoding']
     html = response.content.decode(encoding, errors='ignore')
     
     try:
