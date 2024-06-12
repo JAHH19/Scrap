@@ -9,8 +9,17 @@ app = Flask(__name__)
 PREFIX = 'https:/'
 
 def get_curl_command(url: str) -> str:
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'Connection': 'keep-alive',
+        'Referer': url  # Agrega el encabezado Referer con la URL de origen
+    }
+     
     try:
-        html = requests.get(url).content.decode()
+        html = requests.get(url, headers=headers).content.decode()
         token = re.search(r".*document.getElementById.*\('norobotlink'\).innerHTML =.*?token=(.*?)'.*?;", html, re.M|re.S).group(1)
         infix = re.search(r'.*<div id="ideoooolink" style="display:none;">(.*?token=).*?<[/]div>', html, re.M|re.S).group(1)
         final_URL = f'{PREFIX}{infix}{token}'
