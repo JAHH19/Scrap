@@ -22,7 +22,7 @@ def get_curl_command(url: str) -> str:
     
     # Detect and handle encoding using chardet
     result = chardet.detect(response.content)
-    encoding = result['encoding']
+    encoding = result['encoding'] or 'utf-8'
     html = response.content.decode(encoding, errors='ignore')
     
     try:
