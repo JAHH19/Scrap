@@ -2,13 +2,14 @@
 import os
 import re
 import requests
+import chardet
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
 PREFIX = 'https:/'
 
-def get_curl_command(url: str) -> str:
+def get_html_content(url: str) -> str:
     try:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -22,9 +23,25 @@ def get_curl_command(url: str) -> str:
         response = requests.get(url, headers=headers)
         response.raise_for_status()  # Lanza una excepción si hay un error HTTP
         
-        html = response.text
+        # Detectar la codificación del contenido
+        encoding = chardet.detect(response.content)['encoding']
+        if not encoding:
+            encoding = 'utf-8'  # Si no se detecta, asumir UTF-8
         
-        print(html)
+        # Decodificar el contenido usando la codificación detectada
+        html = response.content.decode(encoding, errors='ignore')
+        
+        return html
+    
+    except requests.exceptions.RequestException as e:
+        raise ValueError(f"Error retrieving data from URL: {str(e)}")
+    
+    except Exception as e:
+        raise ValueError(f"Error processing HTML response: {str(e)}")
+
+def get_curl_command(url: str) -> str:
+    try:
+        html = get_html_content(url)
         
         token_match = re.search(r".*document.getElementById.*\('norobotlink'\).innerHTML =.*?token=(.*?)'.*?;", html, re.M|re.S)
         if not token_match:
@@ -45,8 +62,8 @@ def get_curl_command(url: str) -> str:
         
         return f"curl -L -o '{orig_title}' '{final_URL}'"
     
-    except requests.exceptions.RequestException as e:
-        raise ValueError(f"Error retrieving data from URL: {str(e)}")
+    except ValueError as ve:
+        raise ve
     
     except Exception as e:
         raise ValueError(f"Error processing HTML response: {str(e)}")
