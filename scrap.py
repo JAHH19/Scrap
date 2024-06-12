@@ -18,7 +18,10 @@ def get_curl_command(url: str) -> str:
     }
     session = requests.Session()
     response = session.get(url, headers=headers)
-    html = response.content.decode()
+    
+    # Detect and handle encoding
+    encoding = response.encoding if response.encoding else 'utf-8'
+    html = response.content.decode(encoding, errors='ignore')
     
     try:
         token = re.search(r".*document.getElementById.*\('norobotlink'\).innerHTML =.*?token=(.*?)'.*?;", html, re.M|re.S).group(1)
