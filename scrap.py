@@ -30,7 +30,7 @@ def get_html_content(url: str) -> str:
         
         # Decodificar el contenido usando la codificación detectada
         html = response.content.decode(encoding, errors='ignore')
-        
+        print(html)
         return html
     
     except requests.exceptions.RequestException as e:
