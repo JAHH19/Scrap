@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from flask import Flask, request, jsonify
+from chromedriver_py import binary_path
 
 app = Flask(__name__)
 
@@ -17,7 +18,7 @@ def get_curl_command(url: str) -> str:
         options = Options()
         options.add_argument('--headless')  # Ejecutar Chrome en modo headless (sin interfaz gráfica)
 
-        service = Service('path/to/chromedriver')  # Reemplaza 'path/to/chromedriver' con la ruta al ejecutable de chromedriver
+        service = Service(binary_path)  # Reemplaza 'path/to/chromedriver' con la ruta al ejecutable de chromedriver
 
         driver = webdriver.Chrome(service=service, options=options)
         driver.get(url)
