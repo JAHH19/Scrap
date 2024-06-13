@@ -13,7 +13,7 @@ app = Flask(__name__)
 PREFIX = 'https:/'
 
 chromedriver_path = chromedriver_autoinstaller.install()
-
+os.environ["PATH"] += os.pathsep + chromedriver_path
 def get_curl_command(url: str) -> str:
     try:
         options = Options()
@@ -26,7 +26,7 @@ def get_curl_command(url: str) -> str:
         options.add_argument('disable-infobars')
         options.add_argument('--disable-extensions')
 
-        service = Service(chromedriver_path)
+        service = Service()
 
         driver = webdriver.Chrome(service=service, options=options)
         driver.get(url)
