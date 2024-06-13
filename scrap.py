@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from flask import Flask, request, jsonify
-from chromedriver_py import binary_path
+import chromedriver_binary
 
 app = Flask(__name__)
 
@@ -24,7 +24,7 @@ def get_curl_command(url: str) -> str:
         options.add_argument('disable-infobars')
         options.add_argument('--disable-extensions')
 
-        service = Service(binary_path)
+        service = Service(chromedriver_binary)
 
         driver = webdriver.Chrome(service=service, options=options)
         driver.get(url)
