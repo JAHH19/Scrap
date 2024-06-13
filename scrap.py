@@ -24,7 +24,7 @@ def get_curl_command(url: str) -> str:
         options.add_argument('disable-infobars')
         options.add_argument('--disable-extensions')
 
-        service = Service(chromedriver_binary)
+        service = Service(chromedriver_binary.chromedriver_filename)
 
         driver = webdriver.Chrome(service=service, options=options)
         driver.get(url)
